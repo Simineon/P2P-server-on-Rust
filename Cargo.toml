@@ -1,0 +1,12 @@
+[package]
+name = "untitled1"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rsa = "0.9"
+rand = "0.8.5"
+chrono = "0.4.43"
+get_if_addrs = "0.5.3"
+hightower-stun = "0.1.1"
+stunclient = "0.4.2"
