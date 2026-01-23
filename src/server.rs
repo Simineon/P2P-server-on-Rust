@@ -99,7 +99,6 @@
 //! License: GPL-3.0-or-later
 //! ```
 use std::fs;
-use std::net::{IpAddr, ToSocketAddrs};
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
@@ -110,7 +109,6 @@ use rsa::{RsaPrivateKey, RsaPublicKey, pkcs1::DecodeRsaPublicKey};
 use rsa::pkcs1::EncodeRsaPublicKey;
 use rsa::pkcs1v15::Pkcs1v15Encrypt;
 use rand::rngs::OsRng;
-use hightower_stun::client::StunClient;
 
 pub struct Log {
     name: String,
@@ -256,7 +254,7 @@ impl P2P {
         }
     }
 
-    fn get_public_ip() -> Result<String, Box<dyn std::error::Error>> {
+    pub fn get_public_ip() -> Result<String, Box<dyn std::error::Error>> {
         let services = [
             "https://api.ipify.org",
             "https://icanhazip.com",
