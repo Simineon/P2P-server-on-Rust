@@ -116,7 +116,7 @@ pub struct Log {
 
 impl Log {
     pub fn new(name: &str) -> Self {
-        println!("[LOG] Log started for: {}", name);
+        println!("[LOG] Log started writing for: {}", name);
 
         let _ = fs::create_dir_all("logs");
 
@@ -126,10 +126,7 @@ impl Log {
     }
 
     pub fn save_data(&self, data: &str) {
-        let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S");
-        let log_message = format!("[{}] {}", timestamp, data);
-
-        println!("[LOG:{}] {}", self.name, data);
+        let log_message = format!("[{}] {}", chrono::Local::now().format("%Y-%m-%d %H:%M:%S"), data);
 
         let file_path = format!("logs/{}", self.name);
         match fs::OpenOptions::new()
@@ -149,8 +146,7 @@ impl Log {
     }
 
     pub fn kill_log(&self) {
-        let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S");
-        let log_message = format!("[{}] Log stopped", timestamp);
+        let log_message = format!("[{}] Log stopped writing", chrono::Local::now().format("%Y-%m-%d %H:%M:%S"));
 
         let file_path = format!("logs/{}", self.name);
         match fs::OpenOptions::new()
@@ -167,8 +163,6 @@ impl Log {
                 eprintln!("Failed to open log file {}: {}", file_path, e);
             }
         }
-
-        println!("[LOG:{}] Log stopped", self.name);
     }
 }
 
@@ -203,7 +197,7 @@ impl P2P {
             String::new()
         });
 
-        let local_ip = Self::get_local_ip_fallback();
+        let local_ip = Self::get_local_ip();
         println!("Local IP for binding: {}", local_ip);
         println!("Public IP for sharing: {}", if public_ip.is_empty() { "Unknown" } else { &public_ip });
 
@@ -254,6 +248,9 @@ impl P2P {
         }
     }
 
+    // Getting public IP
+    // WARNING! - That's function can't work with - RU white lists/firewall
+    // TODO: STUN server and find IP by STUN server
     pub fn get_public_ip() -> Result<String, Box<dyn std::error::Error>> {
         let services = [
             "https://api.ipify.org",
@@ -358,7 +355,8 @@ impl P2P {
         }
     }
 
-    fn get_local_ip_fallback() -> String {
+    // getting local ip (connection by wi-fi)
+    fn get_local_ip() -> String {
         if let Ok(socket) = std::net::UdpSocket::bind("0.0.0.0:0") {
             if let Ok(()) = socket.connect("8.8.8.8:80") {
                 if let Ok(addr) = socket.local_addr() {
@@ -384,45 +382,6 @@ impl P2P {
 
         "0.0.0.0".to_string()
     }
-
-    // getting local ip (connection by wi-fi)
-    // fn get_local_ip_str() -> String {
-    //     if let Ok(socket) = std::net::UdpSocket::bind("0.0.0.0:0") {
-    //         if let Ok(()) = socket.connect("8.8.8.8:80") {
-    //             if let Ok(addr) = socket.local_addr() {
-    //                 if let std::net::IpAddr::V4(ipv4) = addr.ip() {
-    //                     if !ipv4.is_loopback() && !ipv4.is_unspecified() {
-    //                         return ipv4.to_string();
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     if let Ok(listener) = TcpListener::bind("0.0.0.0:0") {
-    //         if let Ok(addr) = listener.local_addr() {
-    //             if let std::net::IpAddr::V4(ipv4) = addr.ip() {
-    //                 if !ipv4.is_loopback() {
-    //                     return ipv4.to_string();
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     if let Ok(hostname) = hostname::get() {
-    //         if let Ok(addrs) = (hostname.to_string_lossy() + ":0").to_socket_addrs() {
-    //             for addr in addrs {
-    //                 if let std::net::IpAddr::V4(ipv4) = addr.ip() {
-    //                     if !ipv4.is_loopback() && !ipv4.is_unspecified() {
-    //                         return ipv4.to_string();
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     "127.0.0.1".to_string()
-    // }
 
     pub fn start(&mut self) {
         let bind_addr = if self.bind_ip == "0.0.0.0" {
@@ -1086,6 +1045,7 @@ impl P2P {
         false
     }
 
+    // Raw send (send func without encrypting)
     pub fn raw_send(&self, address: &str, message: &[u8]) -> bool {
         let idx = match self.get_ind_by_address(address) {
             Some(idx) => idx,

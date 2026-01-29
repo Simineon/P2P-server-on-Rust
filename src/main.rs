@@ -42,8 +42,8 @@ impl MessageMonitor {
                     if p2p_clone.check_request(addr) {
                         while let Some(msg) = p2p_clone.get_request(addr) {
                             let message = String::from_utf8_lossy(&msg);
-                            println!("\n[SERVER_MESSAGE] New message from {}: {}", addr, message);
-                            print!("[SERVER_PROMPT] > ");
+                            println!("\nNew message from {}: {}", addr, message);
+                            print!("> ");
                             let _ = io::stdout().flush();
                         }
                     }
@@ -60,34 +60,34 @@ impl MessageMonitor {
 }
 
 fn print_server_info(port: u16, host_ip: &str) {
-    println!("[SERVER_INFO] === P2P Server Started ===");
-    println!("[SERVER_INFO] Port: {}", port);
-    println!("[SERVER_INFO] Host IP: {}", host_ip);
-    println!("[SERVER_INFO] Status: Ready");
-    println!("[SERVER_INFO] ==========================");
+    println!("=== P2P Server Started ===");
+    println!("Port: {}", port);
+    println!("Host IP: {}", host_ip);
+    println!("Status: Ready");
+    println!("==========================");
 }
 
 fn main() -> Result<()> {
-    println!("[SERVER_LOG] ===            P2P Chat Client              ===");
-    println!("[SERVER_LOG] === Server system by Simineon, GPL license. ===");
+    println!("===            P2P Chat Client              ===");
+    println!("=== Server system by Simineon, GPL license. ===");
 
     let port = if let Some(arg) = std::env::args().nth(1) {
         match arg.parse::<u16>() {
             Ok(p) => {
-                println!("[SERVER_LOG] Using port from command line: {}", p);
+                println!("Using port from command line: {}", p);
                 p
             }
             Err(_) => {
-                println!("[SERVER_LOG] Invalid port argument, using default 5555");
+                println!("Invalid port argument, using default 5555");
                 5555
             }
         }
     } else {
-        println!("[SERVER_LOG] No port specified, using default 5555");
+        println!("No port specified, using default 5555");
         5555
     };
 
-    println!("[SERVER_LOG] Creating P2P server on port {}...", port);
+    println!("Creating P2P server on port {}...", port);
 
     let p2p = match P2P::new(port, 10) {
         Ok(mut p2p) => {
@@ -97,7 +97,7 @@ fn main() -> Result<()> {
             Arc::new(p2p)
         }
         Err(e) => {
-            eprintln!("[SERVER_ERROR] Failed to create P2P server: {}", e);
+            eprintln!("Failed to create P2P server: {}", e);
             return Ok(());
         }
     };
@@ -105,15 +105,15 @@ fn main() -> Result<()> {
     let monitor = MessageMonitor::new(Arc::clone(&p2p));
     let monitor_thread = monitor.start();
 
-    println!("\n[SERVER_HELP] Available commands:");
-    println!("[SERVER_HELP]   connect <IP> [port]  - connect with another client");
-    println!("[SERVER_HELP]   peers                - list connected clients");
-    println!("[SERVER_HELP]   msg <address> <text> - send message");
-    println!("[SERVER_HELP]   status               - show server status");
-    println!("[SERVER_HELP]   refresh              - force refresh connections");
-    println!("[SERVER_HELP]   help                 - show this help");
-    println!("[SERVER_HELP]   exit                 - quit");
-    println!("[SERVER_PROMPT] > ");
+    println!("\nAvailable commands:");
+    println!("   connect <IP> [port]  - connect with another client");
+    println!("   peers                - list connected clients");
+    println!("   msg <address> <text> - send message");
+    println!("   status               - show server status");
+    println!("   refresh              - force refresh connections");
+    println!("   help                 - show this help");
+    println!("   exit                 - quit");
+    print!("> ");
 
     let _ = io::stdout().flush();
 
@@ -125,51 +125,49 @@ fn main() -> Result<()> {
 
         let cmd = cmd.trim();
         if cmd.is_empty() {
-            print!("[SERVER_PROMPT] > ");
+            print!("> ");
             let _ = io::stdout().flush();
             continue;
         }
-
-        println!("[SERVER_ECHO] > {}", cmd);
-
+        
         match cmd.to_lowercase().as_str() {
             "exit" => {
-                println!("[SERVER_LOG] Exiting...");
+                println!("Exiting...");
                 break;
             }
 
             "peers" => {
                 let connected = p2p.get_connected_clients();
                 if connected.is_empty() {
-                    println!("[SERVER_PEERS] No connections");
+                    println!("No connections");
                 } else {
-                    println!("[SERVER_PEERS] Connected to: {}", connected.join(", "));
+                    println!("Connected to: {}", connected.join(", "));
                 }
                 let connected_count = p2p.connected_clients_count();
-                println!("[SERVER_PEERS] Active connections: {}", connected_count);
+                println!("Active connections: {}", connected_count);
             }
 
             "status" => {
                 let host_ip = p2p.get_host_ip();
                 let connected_count = p2p.connected_clients_count();
-                println!("[SERVER_STATUS] Server running on port {}", port);
-                println!("[SERVER_STATUS] Host IP: {}", host_ip);
-                println!("[SERVER_STATUS] Active connections: {}", connected_count);
-                println!("[SERVER_STATUS] Server status: Active");
+                println!("Server running on port {}", port);
+                println!("Host IP: {}", host_ip);
+                println!("Active connections: {}", connected_count);
+                println!("Server status: Active");
             }
 
             "myip" => {
-                println!("[SERVER_INFO] Your IP: {}", p2p.get_host_ip());
+                println!("Your IP: {}", p2p.get_host_ip());
             }
 
             "refresh" => {
-                println!("[SERVER_LOG] Refreshing connections...");
+                println!("Refreshing connections...");
                 // Force connection check
                 let connected = p2p.get_connected_clients();
                 if connected.is_empty() {
-                    println!("[SERVER_PEERS] No connections");
+                    println!("No connections");
                 } else {
-                    println!("[SERVER_PEERS] Connected to: {}", connected.join(", "));
+                    println!("Connected to: {}", connected.join(", "));
                 }
             }
 
@@ -181,7 +179,7 @@ fn main() -> Result<()> {
                         match parts[2].parse::<u16>() {
                             Ok(p) => p,
                             Err(_) => {
-                                println!("[SERVER_WARN] Invalid port, using default {}", port);
+                                println!("Invalid port, using default {}", port);
                                 port
                             }
                         }
@@ -189,20 +187,20 @@ fn main() -> Result<()> {
                         port
                     };
 
-                    println!("[SERVER_LOG] Connecting to {}:{}...", ip, target_port);
+                    println!("Connecting to {}:{}...", ip, target_port);
 
                     thread::sleep(Duration::from_millis(100));
 
                     if p2p.create_session(ip, Some(target_port)) {
-                        println!("[SERVER_SUCCESS] ✓ Connected to {}:{}", ip, target_port);
+                        println!("[YES] Connected to {}:{}", ip, target_port);
                         // Show updated peers list
                         let connected = p2p.get_connected_clients();
-                        println!("[SERVER_PEERS] Connected to: {}", connected.join(", "));
+                        println!("Connected to: {}", connected.join(", "));
                     } else {
-                        println!("[SERVER_ERROR] ✗ Failed to connect to {}:{}", ip, target_port);
+                        println!("[NO] Failed to connect to {}:{}", ip, target_port);
                     }
                 } else {
-                    println!("[SERVER_USAGE] Usage: connect <IP> [port]");
+                    println!("Usage: connect <IP> [port]");
                 }
             }
 
@@ -222,7 +220,7 @@ fn main() -> Result<()> {
                     };
 
                     if !is_valid_address {
-                        println!("[SERVER_ERROR] Invalid address format: {}", target);
+                        println!("Invalid address format: {}", target);
                         continue;
                     }
 
@@ -231,53 +229,53 @@ fn main() -> Result<()> {
                     let is_connected = connected.iter().any(|addr| addr.contains(target));
 
                     if !is_connected {
-                        println!("[SERVER_WARN] Not connected to {}. Use 'connect' first.", target);
+                        println!("Not connected to {}. Use 'connect' first.", target);
                         continue;
                     }
 
                     sent_messages.push(format!("To {}: {}", target, message));
 
                     if p2p.send(target, message) {
-                        println!("[SERVER_SUCCESS] ✓ Message sent to {}", target);
+                        println!("[YES] Message sent to {}", target);
                     } else {
-                        println!("[SERVER_ERROR] ✗ Failed to send to {}", target);
+                        println!("[NO] Failed to send to {}", target);
                     }
                 } else {
-                    println!("[SERVER_USAGE] Usage: msg <address> <text>");
+                    println!("Usage: msg <address> <text>");
                 }
             }
 
             "msgs" => {
                 if sent_messages.is_empty() {
-                    println!("[SERVER_LOG] No sent messages yet");
+                    println!("No sent messages yet");
                 } else {
-                    println!("\n[SERVER_LOG] Sent messages:");
-                    println!("[SERVER_LOG] {}", "=".repeat(50));
+                    println!("\nSent messages:");
+                    println!("{}", "=".repeat(50));
                     for (i, msg) in sent_messages.iter().enumerate() {
-                        println!("[SERVER_LOG] {}. {}", i + 1, msg);
+                        println!("{}. {}", i + 1, msg);
                     }
-                    println!("[SERVER_LOG] {}", "=".repeat(50));
+                    println!("{}", "=".repeat(50));
                 }
             }
 
             "help" => {
-                println!("\n[SERVER_HELP] Available commands:");
-                println!("[SERVER_HELP]   connect <IP> [port]  - connect to another peer");
-                println!("[SERVER_HELP]   peers                - show connected peers");
-                println!("[SERVER_HELP]   msg <IP> <text>      - send message");
-                println!("[SERVER_HELP]   msgs                 - show sent messages history");
-                println!("[SERVER_HELP]   status               - show server status");
-                println!("[SERVER_HELP]   refresh              - refresh connections status");
-                println!("[SERVER_HELP]   exit                 - exit program");
-                println!("\n[SERVER_HELP] New messages appear automatically!");
+                println!("\nAvailable commands:");
+                println!("   connect <IP> [port]  - connect to another peer");
+                println!("   peers                - show connected peers");
+                println!("   msg <IP> <text>      - send message");
+                println!("   msgs                 - show sent messages history");
+                println!("   status               - show server status");
+                println!("   refresh              - refresh connections status");
+                println!("   exit                 - exit program");
+                println!("\nNew messages appear automatically!");
             }
 
             _ => {
-                println!("[SERVER_ERROR] Unknown command. Type 'help' for list of commands.");
+                println!("Unknown command. Type 'help' for list of commands.");
             }
         }
 
-        print!("[SERVER_PROMPT] > ");
+        print!("> ");
         let _ = io::stdout().flush();
     }
 
@@ -286,6 +284,6 @@ fn main() -> Result<()> {
 
     let _ = p2p.kill_server();
 
-    println!("[SERVER_LOG] Server stopped.");
+    println!("Server stopped.");
     Ok(())
 }
